@@ -1,5 +1,5 @@
-- name: Configurar Bastion_P
-  hosts: bastion_p
+- name: Configurar Bastion_Host_P
+  hosts: bastion_host_p
   gather_facts: false
 
   vars:
@@ -12,7 +12,7 @@
     - name: Configurar hostname
       cisco.ios.ios_config:
         lines:
-          - hostname Bastion_P
+          - hostname Bastion_Host_P
 
     - name: Configurar interfaz g0/1
       cisco.ios.ios_config:
@@ -22,3 +22,4 @@
           - no ip routing
           - ip default-gateway 10.0.0.1
         parents: interface GigabitEthernet0/1
+
