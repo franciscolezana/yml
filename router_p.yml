@@ -33,14 +33,14 @@
     - name: Configurar ACL para permitir Telnet y bloquear ICMP desde Bastion_P hacia RBB
       cisco.ios.ios_config:
         lines:
-          - ip access-list extended ACL_Bastion_to_RBB
-          - permit tcp host 10.0.0.10 host 30.0.0.2 eq 23
-          - deny icmp host 10.0.0.10 host 30.0.0.2
+          - ip access-list extended ACL_100
+          - permit tcp host 10.0.0.10 host 20.0.0.2 eq 23
+          - deny icmp host 10.0.0.10 host 20.0.0.2
           - permit ip any any
         save_when: modified
 
     - name: Aplicar ACL en interfaz hacia Bastion_P
       cisco.ios.ios_config:
         lines:
-          - ip access-group ACL_Bastion_to_RBB in
-        parents: interface GigabitEthernet0/1
+          - ip access-group ACL_100 out
+        parents: interface GigabitEthernet0/2
