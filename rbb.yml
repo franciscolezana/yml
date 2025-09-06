@@ -31,17 +31,3 @@
       cisco.ios.ios_config:
         lines:
           - ip route 10.0.0.0 255.255.255.0 20.0.0.1
-
-    - name: Configuración de ACL extendida
-      cisco.ios.ios_config:
-        lines:
-          - permit tcp host 10.0.0.10 host 20.0.0.2 eq 23
-          - deny icmp host 10.0.0.10 host 20.0.0.2
-          - permit ip any any
-        parents: ip access-list extended ACL_100
-
-    - name: Aplicar ACL a la interfaz G0/1
-      cisco.ios.ios_config:
-        lines:
-          - ip access-group ACL_100 in
-        parents: interface GigabitEthernet0/1
