@@ -1,31 +1,47 @@
-- name: Configurar RBB
-  hosts: rbb
-  gather_facts: false
-
+- name: Configurar RBB para permitir Telnet y bloquear ICMP
+  hosts: RBB
+  gather_facts: no
+  connection: ansible.netcommon.network_cli
   vars:
-    ansible_connection: ansible.netcommon.network_cli
     ansible_network_os: cisco.ios.ios
+    ansible_user: cisco
+    ansible_password: class
     ansible_become: yes
     ansible_become_method: enable
+    ansible_become_password: class
 
   tasks:
-    - name: Configurar hostname
+    - name: Configuración de interfaz G0/1
       cisco.ios.ios_config:
         lines:
-          - hostname RBB
-
-    - name: Configurar interfaz g0/1
-      cisco.ios.ios_config:
-        lines:
-          - description RBB -> Router_P
-          - ip address 30.0.0.2 255.0.0.0
+          - ip address 20.0.0.2 255.0.0.0
+          - description RBB->ROUTER_P
           - no shutdown
         parents: interface GigabitEthernet0/1
 
-    - name: Configurar VTY para Telnet
+    - name: Configuración de Telnet en líneas VTY
       cisco.ios.ios_config:
         lines:
           - password cisco
           - login
           - transport input telnet
         parents: line vty 0 4
+
+    - name: Configuración de ruta estática hacia red interna
+      cisco.ios.ios_config:
+        lines:
+          - ip route 10.0.0.0 255.255.255.0 20.0.0.1
+
+    - name: Configuración de ACL extendida
+      cisco.ios.ios_config:
+        lines:
+          - permit tcp host 10.0.0.10 host 20.0.0.2 eq 23
+          - deny icmp host 10.0.0.10 host 20.0.0.2
+          - permit ip any any
+        parents: ip access-list extended ACL_100
+
+    - name: Aplicar ACL a la interfaz G0/1
+      cisco.ios.ios_config:
+        lines:
+          - ip access-group ACL_100 in
+        parents: interface GigabitEthernet0/1
