@@ -1,0 +1,31 @@
+- name: Configurar RBB
+  hosts: rbb
+  gather_facts: false
+
+  vars:
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_network_os: cisco.ios.ios
+    ansible_become: yes
+    ansible_become_method: enable
+
+  tasks:
+    - name: Configurar hostname
+      cisco.ios.ios_config:
+        lines:
+          - hostname RBB
+
+    - name: Configurar interfaz g0/1
+      cisco.ios.ios_config:
+        lines:
+          - description RBB -> Router_P
+          - ip address 30.0.0.2 255.0.0.0
+          - no shutdown
+        parents: interface GigabitEthernet0/1
+
+    - name: Configurar VTY para Telnet
+      cisco.ios.ios_config:
+        lines:
+          - password cisco
+          - login
+          - transport input telnet
+        parents: line vty 0 4
