@@ -1,0 +1,46 @@
+- name: Configurar Router_P
+  hosts: router_p
+  gather_facts: false
+
+  vars:
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_network_os: cisco.ios.ios
+    ansible_become: yes
+    ansible_become_method: enable
+
+  tasks:
+    - name: Configurar hostname
+      cisco.ios.ios_config:
+        lines:
+          - hostname Router_P
+
+    - name: Configurar interfaz g0/1
+      cisco.ios.ios_config:
+        lines:
+          - description Router_P -> PC
+          - ip address 10.0.0.1 255.0.0.0
+          - no shutdown
+        parents: interface GigabitEthernet0/1
+
+    - name: Configurar interfaz g0/2
+      cisco.ios.ios_config:
+        lines:
+          - description Router_P -> RBB
+          - ip address 20.0.0.1 255.0.0.0
+          - no shutdown
+        parents: interface GigabitEthernet0/2
+
+    - name: Configurar ACL para permitir Telnet y bloquear ICMP desde Bastion_P hacia RBB
+      cisco.ios.ios_config:
+        lines:
+          - ip access-list extended ACL_Bastion_to_RBB
+          - permit tcp host 10.0.0.10 host 30.0.0.2 eq 23
+          - deny icmp host 10.0.0.10 host 30.0.0.2
+          - permit ip any any
+        save_when: modified
+
+    - name: Aplicar ACL en interfaz hacia Bastion_P
+      cisco.ios.ios_config:
+        lines:
+          - ip access-group ACL_Bastion_to_RBB in
+        parents: interface GigabitEthernet0/1
