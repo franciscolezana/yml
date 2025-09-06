@@ -19,15 +19,21 @@
           - no shutdown
         parents: interface GigabitEthernet0/1
 
-    - name: Configuración de Telnet en líneas VTY
+    - name: Configuración de usuario para SSH
       cisco.ios.ios_config:
         lines:
-          - password cisco
-          - login
-          - transport input telnet
+          - username cisco privilege 15 secret class
+
+    - name: Configuración de Telnet y SSH en líneas VTY
+      cisco.ios.ios_config:
+        lines:
+          - login local
+          - transport input telnet ssh
+          - password cisco   # se usa solo para Telnet
         parents: line vty 0 4
 
-    - name: Configuración de ruta estática hacia red interna
+    - name: Configuración de ruta estática hacia red 10.0.0.0/24
       cisco.ios.ios_config:
         lines:
           - ip route 10.0.0.0 255.255.255.0 20.0.0.1
+
