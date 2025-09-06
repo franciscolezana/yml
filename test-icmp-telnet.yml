@@ -1,0 +1,32 @@
+- name: Probar conectividad desde Bastion_Host_P hacia RBB
+  hosts: Bastion_Host_P
+  gather_facts: false
+
+  vars:
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_network_os: cisco.ios.ios
+    ansible_become: yes
+    ansible_become_method: enable
+
+  tasks:
+    - name: Intentar hacer ping a RBB (espera fallo por ACL)
+      cisco.ios.ios_ping:
+        dest: 20.0.0.2
+      register: ping_result
+      ignore_errors: yes
+
+    - name: Mostrar resultado del ping
+      debug:
+        msg: "Ping falló como se esperaba: {{ ping_result.failed }}"
+
+    - name: Intentar Telnet a RBB
+      community.general.telnet:
+        host: 20.0.0.2
+        login: cisco
+        password: class
+        command: "show ip interface brief"
+      register: telnet_result
+
+    - name: Mostrar resultado del Telnet
+      debug:
+        var: telnet_result
