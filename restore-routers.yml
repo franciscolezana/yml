@@ -1,0 +1,67 @@
+- name: Restaurar routers a estado original
+  hosts: all
+  gather_facts: false
+
+  vars:
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_network_os: cisco.ios.ios
+    ansible_become: yes
+    ansible_become_method: enable
+
+  tasks:
+    - name: Restaurar Router_P
+      when: "'router_p' in group_names"
+      block:
+        - name: Configuración base Router_P
+          cisco.ios.ios_config:
+            lines:
+              - hostname Router_P
+              - ip domain-name example.com
+              - crypto key generate rsa modulus 4096
+              - username cisco privilege 15 secret class
+            save_when: modified
+
+        - name: Configurar VTY para SSH
+          cisco.ios.ios_config:
+            lines:
+              - transport input ssh
+              - login local
+            parents: line vty 0 4
+
+    - name: Restaurar RBB
+      when: "'rbb' in group_names"
+      block:
+        - name: Configuración base RBB
+          cisco.ios.ios_config:
+            lines:
+              - hostname RBB
+              - ip domain-name example.com
+              - crypto key generate rsa modulus 4096
+              - username cisco privilege 15 secret class
+            save_when: modified
+
+        - name: Configurar VTY para SSH
+          cisco.ios.ios_config:
+            lines:
+              - transport input ssh
+              - login local
+            parents: line vty 0 4
+
+    - name: Restaurar Bastion_P
+      when: "'bastion_p' in group_names"
+      block:
+        - name: Configuración base Bastion_P
+          cisco.ios.ios_config:
+            lines:
+              - hostname Bastion_P
+              - ip domain-name example.com
+              - crypto key generate rsa modulus 4096
+              - username cisco privilege 15 secret class
+            save_when: modified
+
+        - name: Configurar VTY para SSH
+          cisco.ios.ios_config:
+            lines:
+              - transport input ssh
+              - login local
+            parents: line vty 0 4
